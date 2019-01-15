@@ -32,9 +32,6 @@ public class Card {
         return number;
     }
 
-    public boolean IsWild() {
-        return isWild;
-    }
 
     public void setColor(CardColor color) {
         this.color = color;
