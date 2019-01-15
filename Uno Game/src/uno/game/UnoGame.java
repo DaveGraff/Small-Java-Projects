@@ -14,7 +14,7 @@ public class UnoGame {
      */
     public static void main(String[] args) {
         System.out.println("Welcome to Dave's UNO!");
-        System.out.println("**********************");
+        System.out.println("**********************\n\n");
     }
     
 }

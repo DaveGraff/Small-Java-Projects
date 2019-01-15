@@ -7,6 +7,6 @@ package uno.game;
  *
  * @author david
  */
-public class CardType {
-    
+public enum CardType {
+    Normal, Wild, Wild_4, Draw, Skip, Reverse;
 }

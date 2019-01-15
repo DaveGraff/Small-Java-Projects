@@ -7,6 +7,6 @@ package uno.game;
  *
  * @author david
  */
-public class CardColor {
-    
+public enum CardColor {
+    Wild, Red, Blue, Green, Yellow;
 }
