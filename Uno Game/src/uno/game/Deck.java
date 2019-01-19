@@ -3,7 +3,7 @@
  */
 package uno.game;
 
-import java.util.Random;
+import java.util.Collections;
 import java.util.Stack;
 
 /**
@@ -18,11 +18,11 @@ public class Deck {
     }
     
     /**
-     * Adds a card to the deck
-     * @param card The card to be added
+     * Adds any number of cards to the deck.
+     * @param cards A list of cards to be added
      */
-    public void addToPile(Card card){
-        cards.add(card);
+    public void addToPile(Card... cards){
+        Collections.addAll(this.cards, cards);
     }
     
     /**
@@ -56,17 +56,18 @@ public class Deck {
      * Shuffles the cards of a deck in random order
      */
     public void shuffle(){
-        Stack<Card> temp = new Stack<>();
-        Random rand = new Random();
-        while(!cards.empty()){
-            int index = rand.nextInt(cards.size());
-            temp.add(cards.get(index));
-            cards.remove(index);
-        }
-        cards = temp;
+        Collections.shuffle(cards);
     }
     
     public Stack<Card> getCards(){
         return cards;
+    }
+    
+    @Override
+    public String toString(){
+        String output = "";
+        for(Card card : cards)
+            output = output.concat(card.toString() + ", ");
+        return output.substring(0, output.length()-1);
     }
 }

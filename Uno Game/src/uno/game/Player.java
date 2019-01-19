@@ -77,7 +77,7 @@ public class Player {
         //Play a special card thats not wild if possible
         for(Card card : hand)
             if(card.getType() != CardType.Normal && (card.getColor() == topCard.getColor() || card.getType() == topCard.getType()))
-                if(card.getType() != CardType.Wild || card.getType() != CardType.Wild_4)
+                if(card.getType() != CardType.Wild && card.getType() != CardType.Wild_4)
                     return card;
         //Play a wild card
         for(Card card : hand)
@@ -85,6 +85,9 @@ public class Player {
                 botChooseWildColor(card);
                 return card;
             }
+        /*for(Card card : hand)
+            if(isValidMove(topCard, card))
+                return card;*/
         //Should never happen
         return null;
     }
@@ -119,5 +122,17 @@ public class Player {
     
     public boolean emptyHand(){
         return hand.isEmpty();
+    }
+    
+    @Override
+    public String toString(){
+        String output = "";
+        for(Card card : hand)
+            output = output.concat(card.toString() + ", ");
+        return output.substring(0, output.length()-1);
+    }
+    
+    public ArrayList<Card> getHand(){
+        return hand;
     }
 }
