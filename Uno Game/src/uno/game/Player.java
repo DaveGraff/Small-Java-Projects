@@ -40,7 +40,7 @@ public class Player {
      * @return True if it is a valid move, false if not
      */
     public boolean isValidMove(Card topCard, Card played){
-        if(topCard.getNumber() != -1 && topCard.getNumber() == played.getNumber())
+        if(topCard.getType() == CardType.Normal && topCard.getNumber() == played.getNumber())
             return true;
         if(played.getType() == CardType.Wild || played.getType() == CardType.Wild_4)
             return true;
@@ -129,7 +129,7 @@ public class Player {
         String output = "";
         for(Card card : hand)
             output = output.concat(card.toString() + ", ");
-        return output.substring(0, output.length()-1);
+        return output.substring(0, output.length()-2);
     }
     
     public ArrayList<Card> getHand(){

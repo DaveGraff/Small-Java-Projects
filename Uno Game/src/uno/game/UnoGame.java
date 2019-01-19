@@ -26,31 +26,45 @@ public class UnoGame {
         
         Deck deck = initDeck();
         Deck discard = new Deck();
-        Card topCard = deck.getTop(discard);deck.addToPile(topCard);
+        Card topCard = deck.getTop(discard);discard.addToPile(topCard);
         turnOrder.initHands(deck, discard);
         
         boolean noWinner = true;
         Player current = turnOrder.getNext();
         while(noWinner){
             Card played = null;
-            Player next = null;
+            
+            //Check for valid move & humanity
             if(!current.hasValidMove(topCard)){
+                System.out.println(current.getName() + " has no valid move and drew a card");
                 current.addCard(deck.getTop(discard));
+                current = turnOrder.getNext();
             } else if (current.isBot()){
                 played = current.botTurn(topCard);
             } else {
                 played = handleHumanTurn(current, topCard);
-            }
-            if(current.emptyHand()){
-                noWinner = false;
-            } else if(played == null){}
-            else{
-                current = handleCardActions(played, turnOrder, deck, discard);
-            }
+            }             
             
+            //Play out changes in game state
+            if(played != null){
+                //remove played card
+                current.getHand().remove(played);
+                //Check for winner
+                if(current.emptyHand())
+                    noWinner = false;
+                //Handle card actions
+                else{
+                    Player oldPlayer = current;
+                    current = handleCardActions(played, turnOrder, deck, discard);
+                    if(oldPlayer.isBot() && oldPlayer.getHand().size() == 1)
+                        System.out.println("UNO!");
+                    topCard = played;
+                    discard.addToPile(topCard);
+                }
+            }
             System.out.println("\n\n");
         }
-        System.out.println("\n\n\n\n\n" + current.getName() + " has won!");
+        System.out.println("\n\n\n\n\n\n\n\n\n" + current.getName() + " has won!");
     }
     
     /**
@@ -94,6 +108,7 @@ public class UnoGame {
         if(played.getType() == CardType.Reverse){
             System.out.println("The turn order has been reversed!");
             order.reverse();
+            next = order.getNext();
         }
         next = order.getNext();
         switch (played.getType()) {
@@ -166,26 +181,26 @@ public class UnoGame {
         }
         
         for(int i=0; i<2; i++){
-            Card redReverse = new Card(CardType.Reverse, CardColor.Red, i);
-            Card blueReverse = new Card(CardType.Reverse, CardColor.Blue, i);
-            Card greenReverse = new Card(CardType.Reverse, CardColor.Green, i);
-            Card yellowReverse = new Card(CardType.Reverse, CardColor.Yellow, i);
-            Card redSkip = new Card(CardType.Skip, CardColor.Red, i);
-            Card blueSkip = new Card(CardType.Skip, CardColor.Blue, i);
-            Card greenSkip = new Card(CardType.Skip, CardColor.Green, i);
-            Card yellowSkip = new Card(CardType.Skip, CardColor.Yellow, i);
-            Card redDraw = new Card(CardType.Draw, CardColor.Red, i);//Draw 2
-            Card blueDraw = new Card(CardType.Draw, CardColor.Blue, i);
-            Card greenDraw = new Card(CardType.Draw, CardColor.Green, i);
-            Card yellowDraw = new Card(CardType.Draw, CardColor.Yellow, i);
+            Card redReverse = new Card(CardType.Reverse, CardColor.Red, -1);
+            Card blueReverse = new Card(CardType.Reverse, CardColor.Blue, -1);
+            Card greenReverse = new Card(CardType.Reverse, CardColor.Green, -1);
+            Card yellowReverse = new Card(CardType.Reverse, CardColor.Yellow, -1);
+            Card redSkip = new Card(CardType.Skip, CardColor.Red, -1);
+            Card blueSkip = new Card(CardType.Skip, CardColor.Blue, -1);
+            Card greenSkip = new Card(CardType.Skip, CardColor.Green, -1);
+            Card yellowSkip = new Card(CardType.Skip, CardColor.Yellow, -1);
+            Card redDraw = new Card(CardType.Draw, CardColor.Red, -1);//Draw 2
+            Card blueDraw = new Card(CardType.Draw, CardColor.Blue, -1);
+            Card greenDraw = new Card(CardType.Draw, CardColor.Green, -1);
+            Card yellowDraw = new Card(CardType.Draw, CardColor.Yellow, -1);
             deck.addToPile(redReverse, blueReverse, greenReverse, yellowReverse);
             deck.addToPile(redSkip, blueSkip, greenSkip, yellowSkip);
             deck.addToPile(redDraw, blueDraw, greenDraw, yellowDraw);
         }
         
         for(int i=0; i< 4; i++){
-            Card wild = new Card(CardType.Wild, CardColor.Wild, i);
-            Card wildDraw = new Card(CardType.Wild, CardColor.Wild, i);
+            Card wild = new Card(CardType.Wild, CardColor.Wild, -1);
+            Card wildDraw = new Card(CardType.Wild, CardColor.Wild, -1);
             deck.addToPile(wild, wildDraw);
         }
         deck.shuffle();
@@ -194,32 +209,37 @@ public class UnoGame {
     
     public static Card handleHumanTurn(Player player, Card topCard){
         System.out.println("It is " + player.getName() + "'s turn!\nThe top card is a " + topCard.toString() + "\nPlease pick a card to play: " + player.toString());
-        int move = getHumanTurnResponse(player.getHand());
-        move--;
-        return player.getHand().remove(move);
+        Card move = getHumanTurnResponse(player, topCard);
+        return move;
     }
     
-    public static int getHumanTurnResponse(ArrayList<Card> hand){
-        //CHECK FOR VALID MOVES
+    public static Card getHumanTurnResponse(Player player, Card topCard){
+        ArrayList<Card> hand = player.getHand();
         boolean invalid = true;
-        int input = -1;
         Scanner sc = new Scanner(System.in);
         while(invalid){
-            System.out.println();
-            String rawInput = sc.next();
+            int input = -1;
+            int tryThis = -1;
+            String rawInput = sc.nextLine();
             try{
                 input = Integer.parseInt(rawInput);
             } catch (NumberFormatException e){}
             if(input > 0 && input <= hand.size()-1)
-                return input + 1;
+                tryThis = input - 1;
             else if(input == 0)
-                return 0;
+                tryThis = 0;
             else{
                 for(Card card : hand)
                     if(card.toString().toLowerCase().equals(rawInput.toLowerCase()))
-                        return hand.indexOf(card);//WRONG INDEX??
+                        tryThis =  hand.indexOf(card);//WRONG INDEX??
             }
+            if(tryThis != -1 && player.isValidMove(topCard, hand.get(tryThis)))
+                return hand.get(tryThis);
+            else if(tryThis != -1)
+                System.out.println("You cannot play a " + hand.get(tryThis).toString() + " right now");
+            else
+                System.out.println("That is not a valid card right now");
         }
-        return -1;//Will never happen
+        return null;//Will never happen
     }
 }
